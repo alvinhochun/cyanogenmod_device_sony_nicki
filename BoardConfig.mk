@@ -30,3 +30,5 @@ BOARD_FLASH_BLOCK_SIZE := 4096
 TARGET_PREBUILT_KERNEL := device/sony/nicki/kernel
 
 BOARD_HAS_NO_SELECT_BUTTON := true
+
+NICKI_RAMDISK_PREBUILT := device/sony/nicki/stock-boot-ramdisk.gz
