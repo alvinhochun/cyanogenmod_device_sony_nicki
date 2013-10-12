@@ -7,7 +7,7 @@
 LOCAL_PATH := $(call my-dir)
 
 # The directory to make the combined root filesystem
-NICKI_COMBINED_ROOT_OUT := $(PRODUCT_OUT)/combinedroot
+NICKI_COMBINED_ROOT_OUT := $(PRODUCT_OUT)/combinedroot/root
 
 # The init file for the combined root filesystem
 
@@ -18,16 +18,18 @@ else
 NICKI_BOOT_RAMDISK := $(NICKI_RAMDISK_PREBUILT)
 endif
 
-# The init executable source
+# The init executable source, can be overriden in BoardConfig.mk
+ifeq ($(strip $(NICKI_COMBINED_ROOT_INIT_SRC)),)
 NICKI_COMBINED_ROOT_INIT_SRC := $(LOCAL_PATH)/init.sh
+endif
 
 # The location of the static busybox
 STATIC_BUSYBOX_BINARY := $(PRODUCT_OUT)/utilities/busybox
 
 # Make the combined root filesystem, with the init executable
-NICKI_COMBINED_ROOT_INIT := $(NICKI_COMBINED_ROOT_OUT)/init
+NICKI_COMBINED_ROOT_TS := $(PRODUCT_OUT)/combinedroot/timestamp
 
-$(NICKI_COMBINED_ROOT_INIT): $(NICKI_BOOT_RAMDISK) \
+$(NICKI_COMBINED_ROOT_TS): $(NICKI_BOOT_RAMDISK) \
 		$(recovery_ramdisk) \
 		$(NICKI_COMBINED_ROOT_INIT_SRC) \
 		$(STATIC_BUSYBOX_BINARY)
@@ -35,17 +37,18 @@ $(NICKI_COMBINED_ROOT_INIT): $(NICKI_BOOT_RAMDISK) \
 	$(hide) mkdir -p $(NICKI_COMBINED_ROOT_OUT)
 	$(hide) mkdir -p $(NICKI_COMBINED_ROOT_OUT)/sbin
 	$(hide) cp -f $(STATIC_BUSYBOX_BINARY) $(NICKI_COMBINED_ROOT_OUT)/sbin/busybox
-	$(hide) mkdir -p $(NICKI_COMBINED_ROOT_OUT)/res
-	$(hide) cp -f $(NICKI_BOOT_RAMDISK) $(NICKI_COMBINED_ROOT_OUT)/res/boot.gz
-	$(hide) cp -f $(recovery_ramdisk) $(NICKI_COMBINED_ROOT_OUT)/res/recovery.gz
-	$(hide) cp -f $(NICKI_COMBINED_ROOT_INIT_SRC) $@
-	$(hide) chmod 755 $@
+	$(hide) mkdir -p $(NICKI_COMBINED_ROOT_OUT)/boot
+	$(hide) cp -f $(NICKI_BOOT_RAMDISK) $(NICKI_COMBINED_ROOT_OUT)/boot/boot.gz
+	$(hide) cp -f $(recovery_ramdisk) $(NICKI_COMBINED_ROOT_OUT)/boot/recovery.gz
+	$(hide) cp -f $(NICKI_COMBINED_ROOT_INIT_SRC) $(NICKI_COMBINED_ROOT_OUT)/init
+	$(hide) chmod 755 $(NICKI_COMBINED_ROOT_OUT)/init
+	$(hide) touch $@
 	@echo -e ${CL_CYN}"----- Made combined root filesystem --------"$(NICKI_COMBINED_ROOT_OUT)${CL_RST}
 
 # The combined ramdisk
 NICKI_COMBINED_RAMDISK := $(PRODUCT_OUT)/ramdisk-combined.img
 
-$(NICKI_COMBINED_RAMDISK): $(NICKI_COMBINED_ROOT_INIT)
+$(NICKI_COMBINED_RAMDISK): $(NICKI_COMBINED_ROOT_TS)
 	$(call pretty,"Target combined ram disk: $@")
 	$(hide) $(MKBOOTFS) $(NICKI_COMBINED_ROOT_OUT) | $(MINIGZIP) > $@
 
