@@ -49,7 +49,7 @@ led_blue_off () {
 # Sanity
 cd /
 
-# Relocate busybox for easy deletion
+# Relocate busybox for easy deletion, since some ramdisks contain /sbin/busybox
 execl /sbin/busybox cp -f /sbin/busybox /boot/busybox
 execl /boot/busybox rm -rf /sbin
 
@@ -81,7 +81,7 @@ BOOTMODE="boot"
 # See kernel source arch/arm/mach-msm/restart_7k.c at msm_reboot_call
 #
 # 0x77665502 means "recovery"
-[ "`/boot/busybox sed 's/.* warmboot=0x77665502 .*/r/' /proc/cmdline`" == "r" ] && BOOTMODE="recovery" && log "reboot says recovery"
+[ "`/boot/busybox sed 's/.* warmboot=0x77665502 .*/r/' /proc/cmdline`" = "r" ] && BOOTMODE="recovery" && log "reboot says recovery"
 
 # Checks if the "/cache/recovery/boot" file exists
 [ -f /cache/recovery/boot ] && BOOTMODE="recovery" && log "cache/recovery/boot says recovery"
@@ -104,8 +104,7 @@ execl kill $!
 /boot/busybox hexdump /keyev.log | /boot/busybox sed -n '/0001 0073 0001 0000$/p' > /keymatch.log
 [ -s /keymatch.log ] && BOOTMODE="recovery" && log "User says recovery"
 
-execl /boot/busybox rm -f /keyev.log
-execl /boot/busybox rm -f /keymatch.log
+execl /boot/busybox rm -f /keyev.log /keymatch.log
 
 # If booting recovery, light cyan LEDs
 if [ $BOOTMODE == recovery ]; then
@@ -129,10 +128,12 @@ execl /boot/busybox rm -f /init
 
 # Extract ramdisk and delete the remaining things
 execl /boot/busybox zcat /boot/$BOOTMODE.gz | /boot/busybox cpio -i
-execl /boot/busybox rm -rf /boot/boot.gz
-execl /boot/busybox rm -f /boot/recovery.gz
-execl /boot/busybox rm -f /boot/busybox
-execl /boot/busybox rmdir /boot
+execl /boot/busybox rm -f /boot/boot.gz /boot/recovery.gz
+if [ "`/boot/busybox ls`" = "busybox" ]; then
+	execl /boot/busybox rm -rf /boot
+else
+	execl /boot/busybox rm -f /boot/busybox
+fi
 
 # Hands over to the new /init and farewell
 log "Handing over to new /init..."
@@ -140,7 +141,7 @@ execl exec /init
 
 # Should never reach here...
 
-# It seems that after busybox sleep is executed, the device cannot reboot
-# normally with busybox reboot. So leave it alone and hope it will be ok.
+# There is no busybox remaining so we cannot do anything. Let's hope it will
+# recover itself...
 log "Init doesn't run! FAIL"
 
