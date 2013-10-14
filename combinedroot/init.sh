@@ -126,22 +126,16 @@ execl /boot/busybox rm -rf /sys
 execl /boot/busybox rm -rf /dev
 execl /boot/busybox rm -f /init
 
-# Extract ramdisk and delete the remaining things
+# Extract ramdisks and delete them
 execl /boot/busybox zcat /boot/$BOOTMODE.gz | /boot/busybox cpio -i
 execl /boot/busybox rm -f /boot/boot.gz /boot/recovery.gz
-if [ "`/boot/busybox ls`" = "busybox" ]; then
-	execl /boot/busybox rm -rf /boot
-else
-	execl /boot/busybox rm -f /boot/busybox
-fi
 
 # Hands over to the new /init and farewell
 log "Handing over to new /init..."
 execl exec /init
 
 # Should never reach here...
-
-# There is no busybox remaining so we cannot do anything. Let's hope it will
-# recover itself...
+# Try to reboot then.
 log "Init doesn't run! FAIL"
+execl /boot/busybox reboot &
 
