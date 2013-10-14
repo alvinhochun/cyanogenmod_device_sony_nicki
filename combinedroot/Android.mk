@@ -31,6 +31,7 @@ NICKI_COMBINED_ROOT_TS := $(PRODUCT_OUT)/combinedroot/timestamp
 
 $(NICKI_COMBINED_ROOT_TS): $(NICKI_BOOT_RAMDISK) \
 		$(recovery_ramdisk) \
+		recoveryimage \
 		$(NICKI_COMBINED_ROOT_INIT_SRC) \
 		$(STATIC_BUSYBOX_BINARY)
 	@echo -e ${CL_CYN}"----- Making combined root filesystem ------"${CL_RST}
