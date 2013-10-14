@@ -36,3 +36,5 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 NICKI_RAMDISK_PREBUILT := device/sony/nicki/stock-boot-ramdisk.gz
 
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
+BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/sony/nicki/recovery/recovery_keys.c
+RECOVERY_NAME := CWM-based Recovery for Xperia M/M Dual
