@@ -45,6 +45,61 @@ led_blue_off () {
 	log "Switching off blue LED"
 	[ -f /sys/class/led/fih_led/control ] && echo "01 2 0" > /sys/class/led/fih_led/control
 }
+# mount_cache: Mount /cache
+mount_cache () {
+	execl /boot/busybox mkdir -m 755 -p /dev/block
+	execl /boot/busybox mknod -m 644 /dev/block/mmcblk0p26 b 179 26
+	execl /boot/busybox mkdir -m 755 -p /cache
+	execl /boot/busybox mount -t ext4 /dev/block/mmcblk0p26 /cache
+}
+# umount_cache: Unmount /cache
+umount_cache () {
+	execl /boot/busybox mount -o remount,ro /cache
+	execl /boot/busybox umount /cache
+	execl /boot/busybox rm -rf /cache
+	execl /boot/busybox rm -f /dev/block/mmcblk0p26
+}
+# should_enter_recovery: Check and decide whether to enter recovery
+#   returns: 0 if should enter recovery, 1 if not
+should_enter_recovery () {
+	# Checks the previous reboot request
+	# On reboot some data will be stuffed to the hardware and the bootloader
+	# will append it to the cmdline as "warmboot".
+	# See kernel source arch/arm/mach-msm/restart_7k.c at msm_reboot_call
+	#
+	# 0x77665502 means "recovery"
+	[ "`/boot/busybox sed 's/.* warmboot=0x77665502 .*/r/' /proc/cmdline`" = "r" ] && log "reboot says recovery" && return 0
+
+	# Create the device used to get key input event
+	execl /boot/busybox mkdir -m 755 -p /dev/input
+	# device: fih_gpio-keys
+	execl /boot/busybox mknod -m 644 /dev/input/event0 c 13 64
+
+	# Asks user (detect Volume Up key press)
+	# Write key events to /keyev.log
+	/boot/busybox cat /dev/input/event0 > /keyev.log &
+
+	# Pink LED indication
+	led_red_on
+	led_blue_on
+	execl /boot/busybox sleep 1
+	led_red_off
+	led_blue_off
+
+	# Kill the cat process (kill is shell builtin)
+	execl kill $!
+
+	# Checks if Volume Up is pressed
+	/boot/busybox hexdump /keyev.log | /boot/busybox sed -n '/0001 0073 0001 0000$/p' > /keymatch.log
+	if [ -s /keymatch.log ]; then
+		log "User says recovery"
+		execl /boot/busybox rm -f /keyev.log /keymatch.log
+		return 0
+	else
+		execl /boot/busybox rm -f /keyev.log /keymatch.log
+		return 1
+	fi
+}
 
 # Sanity
 cd /
@@ -59,52 +114,20 @@ execl /boot/busybox mkdir -m 755 -p /dev
 execl /boot/busybox mknod -m 644 /dev/kmsg c 1 11
 log "/dev/kmsg set up for logging"
 execl /boot/busybox mknod -m 666 /dev/null c 1 3
-execl /boot/busybox mkdir -m 755 -p /dev/block
-execl /boot/busybox mknod -m 644 /dev/block/mmcblk0p26 b 179 26
-execl /boot/busybox mkdir -m 755 -p /dev/input
-# Used to check volume up key (device name: fih_gpio-keys)
-execl /boot/busybox mknod -m 644 /dev/input/event0 c 13 64
 execl /boot/busybox mkdir -m 755 -p /sys
 execl /boot/busybox mount -t sysfs sysfs /sys
 execl /boot/busybox mkdir -m 755 -p /proc
 execl /boot/busybox mount -t proc proc /proc
-execl /boot/busybox mkdir -m 755 -p /cache
-execl /boot/busybox mount -t ext4 /dev/block/mmcblk0p26 /cache
+mount_cache
 
 log "Combined root boot script started at `/boot/busybox date`"
 
 BOOTMODE="boot"
 
-# Checks kernel cmdline. When reboot with command "recovery", some data will be
-# stuffed to the hardware and the bootloader will append it to the cmdline as
-# the command "warmboot".
-# See kernel source arch/arm/mach-msm/restart_7k.c at msm_reboot_call
-#
-# 0x77665502 means "recovery"
-[ "`/boot/busybox sed 's/.* warmboot=0x77665502 .*/r/' /proc/cmdline`" = "r" ] && BOOTMODE="recovery" && log "reboot says recovery"
-
 # Checks if the "/cache/recovery/boot" file exists
-[ -f /cache/recovery/boot ] && BOOTMODE="recovery" && log "cache/recovery/boot says recovery"
+[ -f /cache/recovery/boot ] && BOOTMODE="recovery" && log "cache/recovery/boot says recovery" && execl /boot/busybox rm -f /cache/recovery/boot
 
-# Still asks user (whatever)
-# Write key events to /keyev.log
-/boot/busybox cat /dev/input/event0 > /keyev.log &
-
-# Pink LED indication
-led_red_on
-led_blue_on
-execl /boot/busybox sleep 1
-led_red_off
-led_blue_off
-
-# Kill the cat process (kill is shell builtin)
-execl kill $!
-
-# Checks if volume up is pressed
-/boot/busybox hexdump /keyev.log | /boot/busybox sed -n '/0001 0073 0001 0000$/p' > /keymatch.log
-[ -s /keymatch.log ] && BOOTMODE="recovery" && log "User says recovery"
-
-execl /boot/busybox rm -f /keyev.log /keymatch.log
+should_enter_recovery && BOOTMODE="recovery"
 
 # If booting recovery, light cyan LEDs
 if [ $BOOTMODE == recovery ]; then
@@ -116,9 +139,7 @@ fi
 log "About to cleanup and boot..."
 
 # Cleanup
-execl /boot/busybox mount -o remount,ro /cache
-execl /boot/busybox umount /cache
-execl /boot/busybox rm -rf /cache
+umount_cache
 execl /boot/busybox umount /proc
 execl /boot/busybox rm -rf /proc
 execl /boot/busybox umount /sys
