@@ -51,6 +51,12 @@
 
 #define NUM_BUFFERS 2
 
+/*
+ * For this device, the framebuffer start needs to be aligned to a 4096-byte
+ * boundary.
+ */
+#define FB_MEM_ALIGN 0x1000
+
 typedef struct {
     GGLSurface texture;
     unsigned cwidth;
@@ -153,8 +159,14 @@ static int get_framebuffer(GGLSurface *fb)
 
     fb++;
 
+    /* Make sure the framebuffer is aligned to the specific boundary */
+    unsigned fb_size = vi.yres * fi.line_length;
+    if (fb_size % FB_MEM_ALIGN != 0) {
+        fb_size += FB_MEM_ALIGN - fb_size % FB_MEM_ALIGN;
+    }
+
     /* check if we can use double buffering */
-    if (vi.yres * fi.line_length * 2 > fi.smem_len)
+    if (fb_size * 2 > fi.smem_len)
         return fd;
 
     double_buffering = 1;
@@ -163,7 +175,7 @@ static int get_framebuffer(GGLSurface *fb)
     fb->width = vi.xres;
     fb->height = vi.yres;
     fb->stride = fi.line_length/PIXEL_SIZE;
-    fb->data = (void*) (((unsigned) bits) + vi.yres * fi.line_length);
+    fb->data = (void*) (((unsigned) bits) + fb_size);
     fb->format = PIXEL_FORMAT;
     memset(fb->data, 0, vi.yres * fi.line_length);
 
