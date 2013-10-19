@@ -35,6 +35,8 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 
 NICKI_RAMDISK_PREBUILT := device/sony/nicki/stock-boot-ramdisk.gz
 
+TARGET_RECOVERY_FSTAB = device/sony/nicki/fstab.qcom
+
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/sony/nicki/recovery/recovery_keys.c
 BOARD_CUSTOM_GRAPHICS := ../../../device/sony/nicki/recovery/graphics.c
