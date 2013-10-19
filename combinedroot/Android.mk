@@ -29,6 +29,10 @@ STATIC_BUSYBOX_BINARY := $(PRODUCT_OUT)/utilities/busybox
 # Make the combined root filesystem, with the init executable
 NICKI_COMBINED_ROOT_TS := $(PRODUCT_OUT)/combinedroot/timestamp
 
+ifdef NICKI_COMBINED_INIT_LOGO
+$(NICKI_COMBINED_ROOT_TS): $(NICKI_COMBINED_INIT_LOGO)
+endif
+
 $(NICKI_COMBINED_ROOT_TS): $(NICKI_BOOT_RAMDISK) \
 		$(recovery_ramdisk) \
 		recoveryimage \
@@ -43,6 +47,9 @@ $(NICKI_COMBINED_ROOT_TS): $(NICKI_BOOT_RAMDISK) \
 	$(hide) cp -f $(recovery_ramdisk) $(NICKI_COMBINED_ROOT_OUT)/boot/recovery.gz
 	$(hide) cp -f $(NICKI_COMBINED_ROOT_INIT_SRC) $(NICKI_COMBINED_ROOT_OUT)/init
 	$(hide) chmod 755 $(NICKI_COMBINED_ROOT_OUT)/init
+ifdef NICKI_COMBINED_INIT_LOGO
+	$(hide) cp -f $(NICKI_COMBINED_INIT_LOGO) $(NICKI_COMBINED_ROOT_OUT)/logo.rle
+endif
 	$(hide) touch $@
 	@echo -e ${CL_CYN}"----- Made combined root filesystem --------"$(NICKI_COMBINED_ROOT_OUT)${CL_RST}
 

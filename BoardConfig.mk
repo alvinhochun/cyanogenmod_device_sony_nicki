@@ -34,6 +34,7 @@ TARGET_KERNEL_CONFIG := proj_S3A_user_alvin_defconfig
 BOARD_HAS_NO_SELECT_BUTTON := true
 
 NICKI_RAMDISK_PREBUILT := device/sony/nicki/stock-boot-ramdisk.gz
+NICKI_COMBINED_INIT_LOGO := device/sony/nicki/logo.rle
 
 TARGET_RECOVERY_FSTAB = device/sony/nicki/fstab.qcom
 
