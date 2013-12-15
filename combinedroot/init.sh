@@ -21,30 +21,31 @@ execl () {
 
 # Device-specific function definitions
 # led_<color>_<on|off>: Switch on/off an LED
-led_red_on () {
-	log "Switching on red LED"
-	[ -f /sys/class/led/fih_led/control ] && echo "01 0 1" > /sys/class/led/fih_led/control
+
+# led_control: switch on/off a specified led
+# arguments:
+# 	$1 = led. in this case, 0, 1, or 2
+#	$2 = on/off. in this case, 0 or 1
+led_control() {
+	led_file="/sys/class/led/fih_led/control"
+	if [ ! -f $led_file ]; then
+		return
+	fi
+	case $1 in
+		0) led="red";;
+		1) led="green";;
+		2) led="blue";;
+		*) return;;
+	esac
+	case $2 in
+		0) state="off";;
+		1) state="on";;
+		*) return;;
+	esac
+	log "Switching $state $led LED"
+	echo "01 $1 $2" > $led_file
 }
-led_red_off () {
-	log "Switching off red LED"
-	[ -f /sys/class/led/fih_led/control ] && echo "01 0 0" > /sys/class/led/fih_led/control
-}
-led_green_on () {
-	log "Switching on green LED"
-	[ -f /sys/class/led/fih_led/control ] && echo "01 1 1" > /sys/class/led/fih_led/control
-}
-led_green_off () {
-	log "Switching off green LED"
-	[ -f /sys/class/led/fih_led/control ] && echo "01 1 0" > /sys/class/led/fih_led/control
-}
-led_blue_on () {
-	log "Switching on blue LED"
-	[ -f /sys/class/led/fih_led/control ] && echo "01 2 1" > /sys/class/led/fih_led/control
-}
-led_blue_off () {
-	log "Switching off blue LED"
-	[ -f /sys/class/led/fih_led/control ] && echo "01 2 0" > /sys/class/led/fih_led/control
-}
+
 # mount_cache: Mount /cache
 mount_cache () {
 	execl /boot/busybox mkdir -m 755 -p /dev/block
@@ -80,11 +81,11 @@ should_enter_recovery () {
 	/boot/busybox cat /dev/input/event0 > /keyev.log &
 
 	# Pink LED indication
-	led_red_on
-	led_blue_on
+	led_control 0 1
+	led_control 2 1
 	execl /boot/busybox sleep 1
-	led_red_off
-	led_blue_off
+	led_control 0 0
+	led_control 2 0
 
 	# Kill the cat process (kill is shell builtin)
 	execl kill $!
@@ -132,8 +133,8 @@ should_enter_recovery && BOOTMODE="recovery"
 # If booting recovery, light cyan LEDs
 if [ $BOOTMODE == recovery ]; then
 	log "Booting into recovery"
-	led_green_on
-	led_blue_on
+	led_control 1 1
+	led_control 2 1
 fi
 
 log "About to cleanup and boot..."
@@ -159,4 +160,3 @@ execl exec /init
 # Try to reboot then.
 log "Init doesn't run! FAIL"
 execl /boot/busybox reboot &
-
