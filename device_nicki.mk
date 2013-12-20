@@ -24,5 +24,4 @@ PRODUCT_NAME := full_nicki
 PRODUCT_DEVICE := nicki
 
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/fstab.qcom:root/fstab.qcom \
-    $(LOCAL_PATH)/init.recovery.qcom.rc:root/init.recovery.qcom.rc
+    $(LOCAL_PATH)/fstab.qcom:root/fstab.qcom

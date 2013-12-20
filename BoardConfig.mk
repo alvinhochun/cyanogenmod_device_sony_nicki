@@ -42,4 +42,5 @@ TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/sony/nicki/recovery/recovery_keys.c
 BOARD_CUSTOM_GRAPHICS := ../../../device/sony/nicki/recovery/graphics.c
 RECOVERY_NAME := Xperia M/M Dual CWM-based Recovery
+TARGET_RECOVERY_INITRC := device/sony/nicki/recovery/init.rc
 BOARD_RECOVERY_HANDLES_MOUNT := true
