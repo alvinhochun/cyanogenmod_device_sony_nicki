@@ -65,7 +65,7 @@ should_enter_recovery () {
 	# Checks the previous reboot request
 	# On reboot some data will be stuffed to the hardware and the bootloader
 	# will append it to the cmdline as "warmboot".
-	# See kernel source arch/arm/mach-msm/restart_7k.c at msm_reboot_call
+	# See kernel source arch/arm/mach-msm/restart.c at msm_reboot_call
 	#
 	# 0x77665502 means "recovery"
 	[ "`/boot/busybox sed 's/.* warmboot=0x77665502 .*/r/' /proc/cmdline`" = "r" ] && log "reboot says recovery" && return 0
