@@ -37,11 +37,25 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 NICKI_RAMDISK_PREBUILT := device/sony/nicki/stock-boot-ramdisk.gz
 NICKI_COMBINED_INIT_LOGO := device/sony/nicki/logo.rle
 
-TARGET_RECOVERY_FSTAB = device/sony/nicki/fstab.qcom
+TARGET_RECOVERY_FSTAB = device/sony/nicki/recovery/twrp.fstab
 
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
-BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/sony/nicki/recovery/recovery_keys.c
-BOARD_CUSTOM_GRAPHICS := ../../../device/sony/nicki/recovery/graphics.c
-RECOVERY_NAME := Xperia M/M Dual CWM-based Recovery
+TW_BOARD_CUSTOM_GRAPHICS := ../../../device/sony/nicki/recovery/twrp_graphics.c
 TARGET_RECOVERY_INITRC := device/sony/nicki/recovery/init.rc
-BOARD_RECOVERY_HANDLES_MOUNT := true
+
+DEVICE_RESOLUTION := 480x854
+
+# /data/media
+RECOVERY_SDCARD_ON_DATA := true
+
+TW_EXTERNAL_STORAGE_PATH := "/external_sd"
+TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
+
+TW_HAS_NO_RECOVERY_PARTITION := true
+TW_INCLUDE_JB_CRYPTO := true
+
+TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
+TW_MAX_BRIGHTNESS := 255
+
+BOARD_UMS_LUNFILE := "/sys/class/android_usb/f_mass_storage/lun/file"
+
