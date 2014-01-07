@@ -59,3 +59,9 @@ TW_MAX_BRIGHTNESS := 255
 
 BOARD_UMS_LUNFILE := "/sys/class/android_usb/f_mass_storage/lun/file"
 
+# MultiROM
+MR_DPI := hdpi
+MR_KEXEC_MEM_MIN := 0x85000000
+MR_KEXEC_MEM_MAX := 0x87ffffff
+MR_INIT_DEVICES := device/sony/nicki/multirom/init_devices.c
+
