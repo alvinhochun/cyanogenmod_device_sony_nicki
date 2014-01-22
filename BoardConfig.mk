@@ -65,3 +65,10 @@ MR_KEXEC_MEM_MIN := 0x85000000
 MR_KEXEC_MEM_MAX := 0x87ffffff
 MR_INIT_DEVICES := device/sony/nicki/multirom/init_devices.c
 
+MR_PRODUCT_DEVICE := nicki
+
+MR_SDCARD_BLOCK_DEV := mmcblk1
+MR_SDCARD_PART_PREFIX := mmcblk1p
+MR_USBDISK_BLOCK_DEV := sda
+MR_USBDISK_PART_PREFIX := sda
+
