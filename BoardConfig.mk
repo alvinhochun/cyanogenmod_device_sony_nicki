@@ -3,14 +3,20 @@ USE_CAMERA_STUB := true
 # inherit from the proprietary version
 -include vendor/sony/nicki/BoardConfigVendor.mk
 
-TARGET_ARCH := arm
 TARGET_NO_BOOTLOADER := true
+TARGET_NO_RADIOIMAGE := true
+BOARD_HAS_NO_MISC_PARTITION := true
+
+TARGET_ARCH := arm
 TARGET_BOARD_PLATFORM := msm8960
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := krait
 TARGET_ARCH_VARIANT := armv7-a-neon
-ARCH_ARM_HAVE_TLS_REGISTER := true
+TARGET_CPU_SMP := true
+
+#TARGET_ARCH_VARIANT_CPU := cortex-a9
+#ARCH_ARM_HAVE_TLS_REGISTER := true
 
 #TARGET_BOOTLOADER_BOARD_NAME := nicki
 TARGET_BOOTLOADER_BOARD_NAME := qcom
